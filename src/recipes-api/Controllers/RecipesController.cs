@@ -10,7 +10,7 @@ using System.Text.Json.Serialization;
 namespace recipes_api.Controllers;
 
 [ApiController]
-[Route("/recipe")]
+[Route("recipe")]
 public class RecipesController : ControllerBase
 {    
     public readonly IRecipeService _service;
@@ -25,7 +25,8 @@ public class RecipesController : ControllerBase
     [HttpGet]
     public IActionResult Get()
     {
-       return Ok(_service.GetRecipes());   
+        List<Recipe> recipes = _service.GetRecipes();
+        return Ok(recipes);
     }
 
     // 2 - Sua aplicação deve ter o endpoint GET /recipe/:name
@@ -33,7 +34,9 @@ public class RecipesController : ControllerBase
     [HttpGet("{name}", Name = "GetRecipe")]
     public IActionResult Get(string name)
     {                
-        return Ok(_service.GetRecipe(name));
+        Recipe recipe = _service.GetRecipe(name);
+        if (recipe != null) return Ok(recipe);
+        return NotFound();
     }
 
     // 3 - Sua aplicação deve ter o endpoint POST /recipe
@@ -41,29 +44,34 @@ public class RecipesController : ControllerBase
     public IActionResult Create([FromBody]Recipe recipe)
     {
         _service.AddRecipe(recipe);
-        return Create(recipe);
+        return Created("AddRecipe", recipe);
     }
 
     // 4 - Sua aplicação deve ter o endpoint PUT /recipe
     [HttpPut("{name}")]
     public IActionResult Update(string name, [FromBody]Recipe recipe)
     {
-        if(_service.GetRecipe(name) == null) {
-            return BadRequest();
+        try {
+            Recipe findRecipe = _service.GetRecipe(name);
+            if (findRecipe != null) {
+                _service.UpdateRecipe(recipe);
+                return NoContent();
+            }
+            return NotFound("Recipe not found.");
+        } catch (Exception ex) {
+            return BadRequest(ex.Message);
         }
-        _service.UpdateRecipe(recipe);
-        return NoContent();
-        
     }
 
     // 5 - Sua aplicação deve ter o endpoint DEL /recipe
     [HttpDelete("{name}")]
     public IActionResult Delete(string name)
     {
-        if(_service.GetRecipe(name) == null) {
-            return NotFound();
+        Recipe recipe = _service.GetRecipe(name);
+        if (recipe != null) {
+            _service.DeleteRecipe(name);
+            return NoContent();
         }
-        _service.DeleteRecipe(name);
-        return NoContent();
+        return BadRequest();
     }    
 }
