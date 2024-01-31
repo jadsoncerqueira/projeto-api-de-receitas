@@ -13,3 +13,5 @@ Agora, ela quer expandir esse negócio e criar uma **api de receitas** que vai r
 - Entendi a arquitetura MVC.
 - Criei controllers que recebe dados pelo corpo e pela URL da requisição.
 - Lancei códigos de retorno que respeita o padrão do HTTP Status Code.
+  
+
